@@ -1,0 +1,90 @@
+# Google DA Capstone Project Analyses
+
+First, I initiated the packages I thought I would need to run the analyses. The two I frequently run right at the top are `tidyverse` and `ggplot2`. If there are others in the code block, that's because I added them while conducting my analyses. 
+
+```{R}
+library(tidyverse)
+library(ggplot2)
+library(readxl)
+```
+
+Next, I loaded the data from the CSV files I created in BigQuery.  
+
+```{R}
+setwd("C:/Users/barre/OneDrive/01 Projects/Google Data Analytics Course 2023/Course-08--Capstone-project/Google-DA-capstone-project")
+daily_data <- read_csv('C:/Users/barre/OneDrive/01 Projects/Google Data Analytics Course 2023/Course-08--Capstone-project/Google-DA-capstone-project/Combined-Files-(Minute-Hour-Day)/Day-combined.csv')
+hourly_data <- read_csv("C:/Users/barre/OneDrive/01 Projects/Google Data Analytics Course 2023/Course-08--Capstone-project/Google-DA-capstone-project/Combined-Files-(Minute-Hour-Day)/Hourly-combined.csv")
+minute_data <- read_csv("C:/Users/barre/OneDrive/01 Projects/Google Data Analytics Course 2023/Course-08--Capstone-project/Google-DA-capstone-project/Combined-Files-(Minute-Hour-Day)/Minute-combined.csv")
+```
+
+As I worked with the data, I noticed that R was treating the ID numbers as numbers rather than text. So, I changed the data type of the ID columns. 
+
+```{R}
+daily_data$Id <- as.character(daily_data$Id)
+hourly_data$ID <- as.character(hourly_data$ID)
+minute_data$ID <- as.character(minute_data$ID)
+```
+
+I wanted to get a sense about whether the people that participated in the study were active or not, so I decided to summarize data about active minutes.
+
+```{R}
+daily_summary_all <- daily_data %>%
+  group_by(Id) %>%
+  summarize(MeanActivity = mean(LightlyActiveMinutes + FairlyActiveMinutes +
+                                  VeryActiveMinutes),
+            MinActivity = min(LightlyActiveMinutes + FairlyActiveMinutes +
+                                VeryActiveMinutes),
+            FirstQActivity = quantile((LightlyActiveMinutes +
+                                         FairlyActiveMinutes +
+                                         VeryActiveMinutes), probs = 0.25,
+                                      names = FALSE),
+            MedianActivity = median(LightlyActiveMinutes +
+                                      FairlyActiveMinutes + VeryActiveMinutes),
+            ThirdQActivity = quantile((LightlyActiveMinutes +
+                                         FairlyActiveMinutes +
+                                         VeryActiveMinutes), probs = 0.75, 
+                                      names = FALSE),
+            MaxActivity = max(LightlyActiveMinutes + FairlyActiveMinutes +
+                                VeryActiveMinutes))
+arrange(daily_summary_all, MeanActivity)
+```
+
+After reviewing the data, I began thinking that `LightlyActiveMinutes` was skewing the data, making it difficult to determine how much people exercise. (I thought that `LightlyActiveMinutes` could mean a walk from the living room to the kitchen, and not exercise time.) So, I ran the same calculations without `LightlyActiveMinutes`.
+
+```{R}
+daily_summary_active <- daily_data %>%
+  group_by(Id) %>%
+  summarize(MeanActivity = mean(FairlyActiveMinutes + VeryActiveMinutes),
+            MinActivity = min(FairlyActiveMinutes + VeryActiveMinutes),
+            FirstQActivity = quantile((FairlyActiveMinutes + VeryActiveMinutes),                                         probs = 0.25, names = FALSE),
+            MedianActivity = median(FairlyActiveMinutes + VeryActiveMinutes),
+            ThirdQActivity = quantile((FairlyActiveMinutes + VeryActiveMinutes),                                         probs = 0.75, names = FALSE),
+            MaxActivity = max(FairlyActiveMinutes + VeryActiveMinutes))
+arrange(daily_summary_active, MeanActivity)
+```
+
+I used data from this data frame to make some observations about the type of person that would use a fitness tracker.
+
+I also created a box-and-whisker plot of each participant's activity. This plot didn't make it into the presentation, so I didn't add aesthetics here.
+
+
+```{R}
+ggplot(daily_data, aes(x = Id, y = (LightlyActiveMinutes + FairlyActiveMinutes +                                      VeryActiveMinutes))) + 
+  geom_boxplot(aes(group = Id))
+```
+
+I then created a stacked bar chart showing the various activity levels. 
+
+I was unable to stack the charts based on the length of the bars. (**Something to come back to later.**) So, I just left the plot as a horizontal bar chart without the additional organization. (Since this didn't go in the presentation, I didn't add descriptive elements to the plot.)
+
+```{R}
+temp_01 <- daily_data[, c("Id", "LightlyActiveMinutes", 
+                                 "FairlyActiveMinutes", "VeryActiveMinutes")]
+temp_daily_act <- temp_01 %>%
+  pivot_longer(cols = !Id, names_to = "Act_Type", values_to = "Minutes")
+temp_daily_act$Act_Type <- factor(temp_daily_act$Act_Type, levels =
+                                    c('VeryActiveMinutes',  
+                                      'FairlyActiveMinutes',
+                                      'LightlyActiveMinutes'))
+ggplot(temp_daily_act, aes(fill = Act_Type, y = Minutes, x = Id, minutes)) + geom_col(position = 'stack', stat = 'identity') + coord_flip()
+```

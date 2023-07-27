@@ -8,8 +8,8 @@ This project explores publicly-available data about smart device (smart watch) u
 
 ## Data analysis process
 
-My [assignment journal](Assignment-journal.md) contains information on the source data and the BigQuery procedures I used to organize the data. My [Google DA Analysis](Google-DA-analyses.RMD) file shows how I used R to run the analyses (and where I had to stop).
+My [assignment journal](Assignment-journal.md) contains information on the source data and the BigQuery procedures I used to organize the data. My [Google DA Analyses](Google-DA-analyses.RMD) file shows how I used R to run the analyses (and where I had to stop).  To view the results of the analysis file, take a look at the html version: [Google DA Analyses](Google-DA-analyses.html).
 
 ## Presentation to client
 
-The [Presentation to Bellabeat](Presentation-to-Bellabeat.ppsx) file shows the PowerPoint file I would use to make a presentation. I have one recommendation (because of my self-imposed time limit). I am sure that, given more time, I would have others.# Google-DA-capstone-project
+The [Presentation to Bellabeat](Presentation-to-Bellabeat.ppsx) file shows the PowerPoint file I would use to make a presentation. I have one recommendation (because of my self-imposed time limit). I am sure that, given more time, I would have others.# Google-DA-capstone-project.
